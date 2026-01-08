@@ -72,6 +72,10 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.status(200).send("Backend is active. DB Initialized: " + isInitialized);
+});
+
 app.use(router);
 
 /* ================== INIT ONCE ================== */
@@ -97,6 +101,11 @@ async function init() {
 
 /* ================== SERVERLESS HANDLER ================== */
 module.exports = async (req, res) => {
-  await init();
-  return app(req, res);
+  try {
+    await init();
+    return app(req, res);
+  } catch (error) {
+    console.error("Critical Initialization Error:", error);
+    res.status(500).send("Critical Initialization Error: " + error.message);
+  }
 };
