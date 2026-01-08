@@ -1,73 +1,30 @@
-const express = require("express");
-const cors = require("cors");
-const cookieParser = require("cookie-parser");
-
-const router = require("./routers/router.js");
-const connectDB = require("./db/connect.js");
-const { setupGeminiChat } = require("./gemini/chat.js");
-
-const app = express();
-
-/* ================== CORS (FIXED) ================== */
 const allowedOrigins = [
   "https://peaceful-gdg.vercel.app"
 ];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow server-to-server, Postman, etc.
-      if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    exposedHeaders: ["set-cookie", "token"],
-  })
-);
-
-// Required for browser preflight on Vercel
-app.options("*", cors());
-
-/* ================== BODY PARSERS ================== */
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
-app.use(cookieParser());
-
-/* ================== INIT (RUN ONCE) ================== */
-let isInitialized = false;
-
-app.use(async (req, res, next) => {
-  if (isInitialized) return next();
-
-  try {
-    await connectDB();
-    console.log("DB Connected");
-
-    try {
-      await setupGeminiChat();
-    } catch (err) {
-      console.warn(
-        "Warning: Gemini Chat setup failed. Chat features may not work.",
-        err.message
-      );
-    }
-
-    isInitialized = true;
-    next();
-  } catch (err) {
-    console.error("Critical Initialization Error:", err);
-    res.status(500).json({
-      error: "Critical Initialization Error",
-      message: err.message,
-    });
+  if (allowedOrigins.includes(origin)) {
+    res.header("Access-Control-Allow-Origin", origin);
   }
+
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.header(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, OPTIONS"
+  );
+
+  // 🔴 HANDLE PREFLIGHT
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
 });
 
 /* ================== ROUTES ================== */
