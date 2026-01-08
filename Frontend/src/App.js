@@ -16,8 +16,11 @@ function App() {
   useEffect(() => {
     async function isUser() {
       try {
+        const apiLink =
+          (typeof process !== "undefined" && process.env?.REACT_APP_API_LINK) ||
+          "https://peaceful-gdg-backend.vercel.app";
         const user = await axios.get(
-          process.env.REACT_APP_API_LINK + "/isUser",
+          apiLink + "/isUser",
           {
             withCredentials: true,
           }

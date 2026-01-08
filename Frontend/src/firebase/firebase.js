@@ -16,13 +16,32 @@ import axios from "axios";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID,
-  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+  apiKey:
+    (typeof process !== "undefined" && process.env?.REACT_APP_FIREBASE_API_KEY) ||
+    "",
+  authDomain:
+    (typeof process !== "undefined" &&
+      process.env?.REACT_APP_FIREBASE_AUTH_DOMAIN) ||
+    "",
+  projectId:
+    (typeof process !== "undefined" &&
+      process.env?.REACT_APP_FIREBASE_PROJECT_ID) ||
+    "",
+  storageBucket:
+    (typeof process !== "undefined" &&
+      process.env?.REACT_APP_FIREBASE_STORAGE_BUCKET) ||
+    "",
+  messagingSenderId:
+    (typeof process !== "undefined" &&
+      process.env?.REACT_APP_FIREBASE_MESSAGING_SENDER_ID) ||
+    "",
+  appId:
+    (typeof process !== "undefined" && process.env?.REACT_APP_FIREBASE_APP_ID) ||
+    "",
+  measurementId:
+    (typeof process !== "undefined" &&
+      process.env?.REACT_APP_FIREBASE_MEASUREMENT_ID) ||
+    "",
 };
 
 // Initialize Firebase
@@ -52,7 +71,8 @@ async function LoginWithGoogle() {
     console.log(headers);
 
     const signup = await axios.post(
-      process.env.REACT_APP_API_LINK + "/signupWithGoogle",
+      ((typeof process !== "undefined" && process.env?.REACT_APP_API_LINK) ||
+        "https://peaceful-gdg-backend.vercel.app") + "/signupWithGoogle",
       {},
       { headers, withCredentials: true }
     );
@@ -87,7 +107,8 @@ async function SignupWithEmail(email, password) {
     // One vulnerability here
     // If signup fails, you might want to handle it appropriately (e.g., show an error message to the user)
     await axios.post(
-      process.env.REACT_APP_API_LINK + "/signup",
+      ((typeof process !== "undefined" && process.env?.REACT_APP_API_LINK) ||
+        "https://peaceful-gdg-backend.vercel.app") + "/signup",
       {},
       {
         headers,
