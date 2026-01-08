@@ -19,12 +19,9 @@ function App() {
         const apiLink =
           (typeof process !== "undefined" && process.env?.REACT_APP_API_LINK) ||
           "https://peaceful-gdg-backend.vercel.app";
-        const user = await axios.get(
-          apiLink + "/isUser",
-          {
-            withCredentials: true,
-          }
-        );
+        const user = await axios.get(apiLink + "/api/isUser", {
+          withCredentials: true,
+        });
         if (user) {
           console.log("Yes");
           login();

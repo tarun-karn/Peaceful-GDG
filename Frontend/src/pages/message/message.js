@@ -40,7 +40,7 @@ function Message() {
         const apiLink =
           (typeof process !== "undefined" && process.env?.REACT_APP_API_LINK) ||
           "https://peaceful-gdg-backend.vercel.app";
-        const data = await axios.get(apiLink + "/chat", {
+        const data = await axios.get(apiLink + "/api/chat", {
           withCredentials: true,
         });
         setChatId(data.data.chatId);
@@ -48,7 +48,13 @@ function Message() {
       } catch (error) {
         console.log("Error Fetching Data", error);
         setChatInit(true);
-        setChat([{ message: "Error: Unable to connect to Chat Server. Please check Backend logs and Ensure WebSocket Server is running.", own: false }]);
+        setChat([
+          {
+            message:
+              "Error: Unable to connect to Chat Server. Please check Backend logs and Ensure WebSocket Server is running.",
+            own: false,
+          },
+        ]);
       }
     }
     fetchData();
@@ -163,12 +169,9 @@ function Message() {
       const apiLink =
         (typeof process !== "undefined" && process.env?.REACT_APP_API_LINK) ||
         "https://peaceful-gdg-backend.vercel.app";
-      const { data } = await axios.get(
-        apiLink + "/logout",
-        {
-          withCredentials: true,
-        }
-      );
+      const { data } = await axios.get(apiLink + "/api/logout", {
+        withCredentials: true,
+      });
       console.log(data);
       if (data?.msg === "loggedout") {
         logout();
@@ -181,9 +184,12 @@ function Message() {
   return (
     <div className={styles.messageContainer}>
       <header>
-        <div className={styles.logoContainer} onClick={()=>{
-          navigate('/')
-        }}>
+        <div
+          className={styles.logoContainer}
+          onClick={() => {
+            navigate("/");
+          }}
+        >
           <Logo />
           <div className={styles.headerText}>
             <h4>Peaceful</h4>

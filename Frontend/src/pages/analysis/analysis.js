@@ -243,7 +243,7 @@ function Analysis() {
   const logoutUser = async () => {
     try {
       const { data } = await axios.get(
-        process.env.REACT_APP_API_LINK + "/logout",
+        process.env.REACT_APP_API_LINK + "/api/logout",
         {
           withCredentials: true,
         }
