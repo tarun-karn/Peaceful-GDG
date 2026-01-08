@@ -2,7 +2,7 @@ const WebSocket = require("ws");
 const dotenv = require("dotenv");
 dotenv.config();
 
-const port = process.env.SOCKET_PORT || 8802;
+const port = process.env.PORT || process.env.SOCKET_PORT || 8802;
 const wss = new WebSocket.Server({ port: port });
 console.log(`WebSocketServer listening on port ${port}`);
 

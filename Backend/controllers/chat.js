@@ -42,7 +42,7 @@ const connectWithChatBot = async (req, res) => {
 
     const roomId = uuid();
     // Use env var (now fixed) or fallback
-    const websocketServerBase = process.env.WEBSOCKET_SERVER || "ws://localhost:8802";
+    const websocketServerBase = process.env.WEBSOCKET_SERVER || "wss://peaceful-websocket.onrender.com";
     
     const websocketserverLink = `${websocketServerBase}?${querystring.stringify({
       id: roomId,

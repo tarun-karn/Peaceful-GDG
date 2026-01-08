@@ -37,7 +37,8 @@ function Message() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await axios.get(process.env.REACT_APP_API_LINK + "/chat", {
+        const apiLink = process.env.REACT_APP_API_LINK || "https://peaceful-gdg-backend.vercel.app";
+        const data = await axios.get(apiLink + "/chat", {
           withCredentials: true,
         });
         setChatId(data.data.chatId);
@@ -53,7 +54,7 @@ function Message() {
   useEffect(() => {
     if (chatId !== null) {
       //make a websocket connection here
-      const wsLink = process.env.REACT_APP_WEBSOCKET_LINK || "ws://localhost:8802";
+      const wsLink = process.env.REACT_APP_WEBSOCKET_LINK || "wss://peaceful-websocket.onrender.com";
       console.log("Connecting to WebSocket:", `${wsLink}?id=${chatId}`);
       let wss = new WebSocket(`${wsLink}?id=${chatId}`);
       wss.addEventListener("open", () => {
@@ -154,8 +155,9 @@ function Message() {
 
   const logoutUser = async () => {
     try {
+      const apiLink = process.env.REACT_APP_API_LINK || "https://peaceful-gdg-backend.vercel.app";
       const { data } = await axios.get(
-        process.env.REACT_APP_API_LINK + "/logout",
+        apiLink + "/logout",
         {
           withCredentials: true,
         }

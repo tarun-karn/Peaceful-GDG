@@ -37,8 +37,8 @@ const setupGeminiChat = async () => {
       baseURL: "https://openrouter.ai/api/v1",
       apiKey: apiKey,
       defaultHeaders: {
-        "HTTP-Referer": "http://localhost:3000", // Required by OpenRouter
-        "X-Title": "MindMate Local", // Required by OpenRouter
+        "HTTP-Referer": "https://peaceful-gdg.vercel.app", // Required by OpenRouter
+        "X-Title": "Methods of Peace", // Required by OpenRouter
       },
     });
     activeProvider = "openai";
