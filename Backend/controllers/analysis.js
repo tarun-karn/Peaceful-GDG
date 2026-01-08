@@ -1,5 +1,6 @@
 const dotenv = require("dotenv");
 dotenv.config();
+const axios = require("axios");
 const { startGeminiChat } = require("../gemini/chat.js");
 const chatHistModel = require("../models/ChatHist.js");
 const {

@@ -12,6 +12,16 @@ try {
   serviceAccount = {};
 }
 
+// Check for single JSON string env var (FIREBASE_KEY)
+if (process.env.FIREBASE_KEY) {
+  try {
+    const jsonCreds = JSON.parse(process.env.FIREBASE_KEY);
+    serviceAccount = jsonCreds;
+  } catch (e) {
+    console.warn("Failed to parse FIREBASE_KEY environment variable:", e.message);
+  }
+}
+
 // If env vars are present, prefer them (useful for CI / production)
 if (process.env.FIREBASE_PRIVATE_KEY && process.env.FIREBASE_CLIENT_EMAIL) {
   const privateKey = process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n");
@@ -53,14 +63,17 @@ try {
     !key.includes("...");
   if (!serviceAccount || !serviceAccount.private_key || !looksLikePem) {
     console.error(
-      "Invalid or missing Firebase private key. Replace 'firebase-admin.json' with a valid service account JSON (ensure the private_key contains full PEM with proper -----BEGIN/END PRIVATE KEY----- blocks), or set the credentials via environment variables."
+      "Invalid or missing Firebase private key. Check FIREBASE_KEY or individual env vars."
     );
-    throw new Error("Firebase private_key is missing or not a valid PEM.");
-  }
-  if (!admin.apps.length) {
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-    });
+     // Don't throw here to avoid crashing the server on startup.
+     // Subsequent calls to admin.auth() will fail, which is better than a boot crash.
+  } else {
+      if (!admin.apps.length) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+        });
+        console.log("Firebase Admin Initialized successfully.");
+      }
   }
 } catch (err) {
   // Provide clearer error message for troubleshooting invalid credentials
@@ -68,7 +81,7 @@ try {
     "Failed to initialize Firebase admin:",
     err && err.message ? err.message : err
   );
-  throw err;
+  // throw err; // Suppress throw to prevent Vercel boot loop crash
 }
 
 module.exports = admin;
