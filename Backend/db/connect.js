@@ -7,7 +7,8 @@ function connectDB() {
     return Promise.reject(new Error("MONGO_URI is missing"));
   }
   
-  return mongoose.connect(uri.trim(), {
+  const cleanUri = String(uri).trim().replace(/\s/g, '');
+  return mongoose.connect(cleanUri, {
     serverSelectionTimeoutMS: 10000,
     connectTimeoutMS: 10000,
     autoIndex: true,

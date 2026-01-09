@@ -1,0 +1,27 @@
+{
+  "srv": [
+    {
+      "name": "ac-nalzxl5-shard-00-02.iphpfrm.mongodb.net",
+      "port": 27017,
+      "priority": 0,
+      "weight": 0
+    },
+    {
+      "name": "ac-nalzxl5-shard-00-00.iphpfrm.mongodb.net",
+      "port": 27017,
+      "priority": 0,
+      "weight": 0
+    },
+    {
+      "name": "ac-nalzxl5-shard-00-01.iphpfrm.mongodb.net",
+      "port": 27017,
+      "priority": 0,
+      "weight": 0
+    }
+  ],
+  "txt": [
+    [
+      "authSource=admin&replicaSet=atlas-5n56w4-shard-0"
+    ]
+  ]
+}

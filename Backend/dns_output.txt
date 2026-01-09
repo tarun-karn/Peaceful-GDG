@@ -1,0 +1,4 @@
+Target: ac-nalzxl5-shard-00-00.iphpfrm.mongodb.net, Port: 27017
+Target: ac-nalzxl5-shard-00-01.iphpfrm.mongodb.net, Port: 27017
+Target: ac-nalzxl5-shard-00-02.iphpfrm.mongodb.net, Port: 27017
+TXT Records: [["authSource=admin&replicaSet=atlas-5n56w4-shard-0"]]
