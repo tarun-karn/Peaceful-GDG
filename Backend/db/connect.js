@@ -1,9 +1,5 @@
-const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const path = require("path");
-
-// Load .env from the Backend directory so absolute launches still pick up env vars
-dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 function connectDB() {
   const uri = process.env.MONGO_URI ? process.env.MONGO_URI.trim() : null;
@@ -19,6 +15,9 @@ function connectDB() {
   return mongoose.connect(String(uri), {
     serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
+  }).catch(err => {
+    console.error(`MongoDB Connection Object Error: Name: ${err.name}, Code: ${err.code}, Message: ${err.message}`);
+    throw err;
   });
 }
 

@@ -103,6 +103,13 @@ app.get("/", async (req, res) => {
     dnsCheck: dnsResult,
     env: process.env.NODE_ENV || "development",
     mongoUriDetected: !!uri,
+    mongoUriLength: uri.length,
+    mongoUriChars: {
+      hasAt: uri.includes("@"),
+      hasSlash: uri.includes("/", 14), // Check for slash after the protocol
+      hasQuestion: uri.includes("?"),
+      startsWithMongodb: uri.startsWith("mongodb")
+    },
     mongoUriPrefix: uri ? uri.substring(0, 20) + "..." : "None",
     timestamp: new Date().toISOString()
   });
