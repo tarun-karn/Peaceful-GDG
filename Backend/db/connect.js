@@ -12,9 +12,12 @@ function connectDB() {
     return Promise.reject(new Error("MONGO_URI environment variable is not set"));
   }
   
-  console.log("Attempting to connect to MongoDB...");
+  // Extract parts for safer logging
+  const maskedUri = uri.replace(/\/\/.*@/, "//****:****@");
+  console.log(`Attempting to connect to MongoDB with URI: ${maskedUri}`);
+  
   return mongoose.connect(String(uri), {
-    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of hanging forever
+    serverSelectionTimeoutMS: 5000,
     socketTimeoutMS: 45000,
   });
 }
