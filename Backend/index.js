@@ -70,18 +70,23 @@ app.use((req, res, next) => {
 // Health check
 app.get("/", async (req, res) => {
   let dnsResult = "Not tested";
+  const uri = (process.env.MONGO_URI || "").trim();
   try {
-    const uri = process.env.MONGO_URI;
     if (uri) {
       const match = uri.match(/@([^/?#]+)/);
       if (match) {
         const host = match[1];
-        const lookup = await dns.lookup(host);
-        dnsResult = `Resolved ${host} to ${lookup.address}`;
+        // Use a simpler approach for DNS check to avoid EBUSY if possible
+        try {
+           const lookup = await dns.lookup(host);
+           dnsResult = `Resolved ${host} to ${lookup.address}`;
+        } catch (innerErr) {
+           dnsResult = `DNS Lookup Failed for ${host}: ${innerErr.message}`;
+        }
       }
     }
   } catch (err) {
-    dnsResult = `DNS Error: ${err.message}`;
+    dnsResult = `Diagnostic Error: ${err.message}`;
   }
 
   res.status(200).json({
@@ -91,8 +96,8 @@ app.get("/", async (req, res) => {
     dbError: dbError || "None",
     dnsCheck: dnsResult,
     env: process.env.NODE_ENV || "development",
-    mongoUriDetected: !!process.env.MONGO_URI,
-    mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 10) + "..." : "None",
+    mongoUriDetected: !!uri,
+    mongoUriPrefix: uri ? uri.substring(0, 15) + "..." : "None",
     timestamp: new Date().toISOString()
   });
 });
