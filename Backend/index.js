@@ -73,15 +73,21 @@ app.get("/", async (req, res) => {
   const uri = (process.env.MONGO_URI || "").trim();
   try {
     if (uri) {
+      const isSrv = uri.startsWith("mongodb+srv://");
       const match = uri.match(/@([^/?#]+)/);
       if (match) {
         const host = match[1];
-        // Use a simpler approach for DNS check to avoid EBUSY if possible
         try {
-           const lookup = await dns.lookup(host);
-           dnsResult = `Resolved ${host} to ${lookup.address}`;
+          if (isSrv) {
+            // SRV records need resolveSrv
+            const srvRecords = await dns.resolveSrv(`_mongodb._tcp.${host}`);
+            dnsResult = `SRV Resolved: Found ${srvRecords.length} servers.`;
+          } else {
+            const lookup = await dns.lookup(host);
+            dnsResult = `Resolved ${host} to ${lookup.address}`;
+          }
         } catch (innerErr) {
-           dnsResult = `DNS Lookup Failed for ${host}: ${innerErr.message}`;
+           dnsResult = `DNS ${isSrv ? 'SRV ' : ''}Lookup Failed for ${host}: ${innerErr.message}`;
         }
       }
     }
@@ -97,7 +103,7 @@ app.get("/", async (req, res) => {
     dnsCheck: dnsResult,
     env: process.env.NODE_ENV || "development",
     mongoUriDetected: !!uri,
-    mongoUriPrefix: uri ? uri.substring(0, 15) + "..." : "None",
+    mongoUriPrefix: uri ? uri.substring(0, 20) + "..." : "None",
     timestamp: new Date().toISOString()
   });
 });
