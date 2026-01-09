@@ -92,8 +92,9 @@ app.get("/", async (req, res) => {
     dbInitialized: mongoose.connection.readyState === 1,
     dbStatus: mongoose.connection.readyState,
     dbError: dbError || "None",
+    fullUriMasked: maskedUri,
     aiStatus: getAIStatus(),
-    websocketServer: process.env.WEBSOCKET_SERVER || "wss://peaceful-websocket.onrender.com (FALLBACK)",
+    websocketServer: (process.env.WEBSOCKET_SERVER || "wss://peaceful-websocket.onrender.com").replace(/^http/, 'ws'),
     timestamp: new Date().toISOString()
   });
 });
