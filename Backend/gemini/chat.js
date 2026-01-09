@@ -18,35 +18,41 @@ let activeProvider = null;
 const HARDCODED_KEY = "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";
 
 const setupGeminiChat = async () => {
-  let apiKey = process.env.GEMINI_KEY;
-  if (!apiKey || apiKey === "undefined") {
-    console.warn("process.env.GEMINI_KEY missing. Using Hardcoded Fallback.");
-    apiKey = HARDCODED_KEY;
-  }
+  try {
+    let apiKey = process.env.GEMINI_KEY;
+    if (!apiKey || apiKey === "undefined") {
+      console.warn("process.env.GEMINI_KEY missing. Using Hardcoded Fallback.");
+      apiKey = HARDCODED_KEY;
+    }
 
-  if (!apiKey) {
-    console.error("CRITICAL: API Key is TOTALLY MISSING.");
-    return;
-  }
+    if (!apiKey) {
+      console.error("CRITICAL: API Key is TOTALLY MISSING.");
+      return;
+    }
 
-  const isOpenRouter = apiKey.startsWith("sk-or-");
-  
-  if (isOpenRouter) {
-    console.log(`Setting up OpenRouter/OpenAI Client... (Key: ${apiKey.substring(0, 5)}...)`);
-    openaiClient = new OpenAI({
-      baseURL: "https://openrouter.ai/api/v1",
-      apiKey: apiKey,
-      defaultHeaders: {
-        "HTTP-Referer": "https://peaceful-gdg.vercel.app", // Required by OpenRouter
-        "X-Title": "Methods of Peace", // Required by OpenRouter
-      },
-    });
-    activeProvider = "openai";
-  } else {
-    console.log(`Setting up Google Gemini Client... (Key: ${apiKey.substring(0, 5)}...)`);
-    const genAI = new GoogleGenerativeAI(apiKey);
-    geminiModel = genAI.getGenerativeModel({ model: GOOGLE_MODEL_NAME });
-    activeProvider = "google";
+    const isOpenRouter = apiKey.startsWith("sk-or-");
+    
+    if (isOpenRouter) {
+      console.log(`Setting up OpenRouter/OpenAI Client... (Key: ${apiKey.substring(0, 5)}...)`);
+      openaiClient = new OpenAI({
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: apiKey,
+        defaultHeaders: {
+          "HTTP-Referer": "https://peaceful-gdg.vercel.app", // Required by OpenRouter
+          "X-Title": "Methods of Peace", // Required by OpenRouter
+        },
+      });
+      activeProvider = "openai";
+      geminiModel = null;
+    } else {
+      console.log(`Setting up Google Gemini Client... (Key: ${apiKey.substring(0, 5)}...)`);
+      const genAI = new GoogleGenerativeAI(apiKey);
+      geminiModel = genAI.getGenerativeModel({ model: GOOGLE_MODEL_NAME });
+      activeProvider = "google";
+      openaiClient = null;
+    }
+  } catch (err) {
+    console.error("Failed to setup Gemini/OpenRouter clients:", err.message);
   }
 };
 

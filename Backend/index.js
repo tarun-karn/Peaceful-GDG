@@ -5,11 +5,13 @@ const dotenv = require("dotenv");
 const path = require("path");
 const connectDB = require("./db/connect.js");
 const router = require("./routers/router.js");
+const { setupGeminiChat } = require("./gemini/chat.js");
 
 dotenv.config();
 
 const app = express();
 let isInitialized = false;
+let dbError = null;
 
 // Initialize Database connection
 connectDB()
@@ -18,8 +20,14 @@ connectDB()
     isInitialized = true;
   })
   .catch((err) => {
+    dbError = err.message;
     console.error("Database connection failed:", err.message);
   });
+
+// Initialize AI Clients
+setupGeminiChat()
+  .then(() => console.log("AI setup completed"))
+  .catch(err => console.error("AI setup failed:", err.message));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -62,6 +70,8 @@ app.get("/", (req, res) => {
   res.status(200).json({
     status: "Backend is active",
     dbInitialized: isInitialized,
+    dbError: dbError || "None",
+    env: process.env.NODE_ENV || "development"
   });
 });
 
