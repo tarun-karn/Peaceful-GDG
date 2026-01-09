@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
-const dns = require("dns").promises;
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -69,49 +68,12 @@ app.use((req, res, next) => {
 
 /* ================== ROUTES ================== */
 // Health check
-app.get("/", async (req, res) => {
-  let dnsResult = "Not tested";
-  const uri = (process.env.MONGO_URI || "").trim();
-  try {
-    if (uri) {
-      const isSrv = uri.startsWith("mongodb+srv://");
-      const match = uri.match(/@([^/?#]+)/);
-      if (match) {
-        const host = match[1];
-        try {
-          if (isSrv) {
-            // SRV records need resolveSrv
-            const srvRecords = await dns.resolveSrv(`_mongodb._tcp.${host}`);
-            dnsResult = `SRV Resolved: Found ${srvRecords.length} servers.`;
-          } else {
-            const lookup = await dns.lookup(host);
-            dnsResult = `Resolved ${host} to ${lookup.address}`;
-          }
-        } catch (innerErr) {
-           dnsResult = `DNS ${isSrv ? 'SRV ' : ''}Lookup Failed for ${host}: ${innerErr.message}`;
-        }
-      }
-    }
-  } catch (err) {
-    dnsResult = `Diagnostic Error: ${err.message}`;
-  }
-
+app.get("/", (req, res) => {
   res.status(200).json({
     status: "Backend is active",
     dbInitialized: isInitialized,
-    dbStatus: mongoose.connection.readyState,
     dbError: dbError || "None",
-    dnsCheck: dnsResult,
-    env: process.env.NODE_ENV || "development",
-    mongoUriDetected: !!uri,
-    mongoUriLength: uri.length,
-    mongoUriChars: {
-      hasAt: uri.includes("@"),
-      hasSlash: uri.includes("/", 14), // Check for slash after the protocol
-      hasQuestion: uri.includes("?"),
-      startsWithMongodb: uri.startsWith("mongodb")
-    },
-    mongoUriPrefix: uri ? uri.substring(0, 20) + "..." : "None",
+    mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 15) + "..." : "None",
     timestamp: new Date().toISOString()
   });
 });
