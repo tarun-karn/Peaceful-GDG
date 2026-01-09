@@ -1,13 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-const dotenv = require("dotenv");
 const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config();
+
 const connectDB = require("./db/connect.js");
 const router = require("./routers/router.js");
 const { setupGeminiChat } = require("./gemini/chat.js");
-
-dotenv.config();
 
 const app = express();
 let isInitialized = false;
@@ -71,7 +71,10 @@ app.get("/", (req, res) => {
     status: "Backend is active",
     dbInitialized: isInitialized,
     dbError: dbError || "None",
-    env: process.env.NODE_ENV || "development"
+    env: process.env.NODE_ENV || "development",
+    mongoUriDetected: !!process.env.MONGO_URI,
+    mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 10) + "..." : "None",
+    timestamp: new Date().toISOString()
   });
 });
 
