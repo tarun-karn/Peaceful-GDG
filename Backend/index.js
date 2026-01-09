@@ -91,12 +91,44 @@ app.get("/debug-db", async (req, res) => {
     res.json({ status: "Success", message: "Connected to MongoDB" });
   } catch (err) {
     dbError = `[${err.name || "Error"}] ${err.message}`;
-    if (err.reason) dbError += ` (Reason: ${err.reason.message})`;
+    if (err.reason) {
+      dbError += ` (Reason: ${err.reason.message || "Unknown Server Status"})`;
+    }
     res.status(500).json({ 
       status: "Failed", 
       error: dbError
     });
   }
+});
+
+app.get("/diagnose-network", async (req, res) => {
+  const net = require("net");
+  const hosts = [
+    "ac-nalzxl5-shard-00-00.iphpfrm.mongodb.net",
+    "ac-nalzxl5-shard-00-01.iphpfrm.mongodb.net",
+    "ac-nalzxl5-shard-00-02.iphpfrm.mongodb.net"
+  ];
+  const results = {};
+  
+  for (const host of hosts) {
+    try {
+      const start = Date.now();
+      await new Promise((resolve, reject) => {
+        const socket = net.createConnection(27017, host);
+        socket.setTimeout(3000);
+        socket.on("connect", () => { socket.end(); resolve(); });
+        socket.on("error", (err) => { socket.destroy(); reject(err); });
+        socket.on("timeout", () => { socket.destroy(); reject(new Error("Timeout after 3s")); });
+      });
+      results[host] = `SUCCESS (${Date.now() - start}ms)`;
+    } catch (err) {
+      results[host] = `FIREWALL_BLOCKED: ${err.message}`;
+    }
+  }
+  res.json({
+    info: "If below says FIREWALL_BLOCKED, your Atlas IP Whitelist is NOT working.",
+    results
+  });
 });
 
 // 🔴 IMPORTANT: prefix routes with /api
