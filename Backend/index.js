@@ -6,6 +6,8 @@ const path = require("path");
 const dotenv = require("dotenv");
 dotenv.config();
 
+const VERSION = "1.1.0-diagnostic";
+
 const connectDB = require("./db/connect.js");
 const router = require("./routers/router.js");
 const { setupGeminiChat } = require("./gemini/chat.js");
@@ -71,11 +73,31 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => {
   res.status(200).json({
     status: "Backend is active",
+    version: VERSION,
     dbInitialized: isInitialized,
+    dbStatus: mongoose.connection.readyState,
     dbError: dbError || "None",
-    mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 15) + "..." : "None",
+    mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + "..." : "None",
     timestamp: new Date().toISOString()
   });
+});
+
+app.get("/debug-db", async (req, res) => {
+  try {
+    console.log("Manual re-connect triggered...");
+    await connectDB();
+    isInitialized = true;
+    dbError = null;
+    res.json({ status: "Success", message: "Connected to MongoDB" });
+  } catch (err) {
+    dbError = `[${err.name || "Error"}] ${err.message}`;
+    if (err.reason) dbError += ` (Reason: ${err.reason.message})`;
+    res.status(500).json({ 
+      status: "Failed", 
+      error: dbError,
+      mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + "..." : "None"
+    });
+  }
 });
 
 // 🔴 IMPORTANT: prefix routes with /api

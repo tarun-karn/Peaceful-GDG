@@ -9,6 +9,12 @@ function connectDB() {
   
   return mongoose.connect(uri.trim(), {
     serverSelectionTimeoutMS: 10000,
+  }).catch(err => {
+    // Surface the underlying reason if it exists (e.g. Authentication failed)
+    if (err.reason && err.reason.error) {
+      err.message += ` (Details: ${err.reason.error.message})`;
+    }
+    throw err;
   });
 }
 
