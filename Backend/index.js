@@ -14,17 +14,22 @@ const { setupGeminiChat } = require("./gemini/chat.js");
 
 const app = express();
 let isInitialized = false;
+const handleDbError = (err) => {
+  dbError = `[${err.name || "Error"}] ${err.message}`;
+  if (err.reason) {
+    const reasonDetail = err.reason.message || JSON.stringify(err.reason);
+    dbError += ` (Reason: ${reasonDetail})`;
+  }
+  console.error("Database connection failed:", err.message);
+};
+
 // Initialize Database connection
 connectDB()
   .then(() => {
     console.log("Database connected successfully");
     dbError = null;
   })
-  .catch((err) => {
-    dbError = `[${err.name || "Error"}] ${err.message}`;
-    if (err.reason) dbError += ` (Reason: ${err.reason.message})`;
-    console.error("Database connection failed:", err.message);
-  });
+  .catch(handleDbError);
 
 // Initialize AI Clients
 setupGeminiChat()
@@ -66,7 +71,16 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/", (req, res) => {
+app.get("/", async (req, res) => {
+  if (req.query.force === "true") {
+    try {
+      await connectDB();
+      dbError = null;
+    } catch (err) {
+      handleDbError(err);
+    }
+  }
+
   const uri = (process.env.MONGO_URI || "").trim();
   const maskedUri = uri.replace(/\/\/.*@/, "//****:****@");
   
