@@ -7,7 +7,9 @@ function connectDB() {
     return Promise.reject(new Error("MONGO_URI is missing"));
   }
   
-  return mongoose.connect(uri.trim());
+  return mongoose.connect(uri.trim(), {
+    serverSelectionTimeoutMS: 10000,
+  });
 }
 
 module.exports = connectDB;
