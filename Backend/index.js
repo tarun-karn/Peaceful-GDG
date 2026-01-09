@@ -10,7 +10,7 @@ const VERSION = "1.1.0-diagnostic";
 
 const connectDB = require("./db/connect.js");
 const router = require("./routers/router.js");
-const { setupGeminiChat } = require("./gemini/chat.js");
+const { setupGeminiChat, getAIStatus } = require("./gemini/chat.js");
 
 const app = express();
 let isInitialized = false;
@@ -92,7 +92,8 @@ app.get("/", async (req, res) => {
     dbInitialized: mongoose.connection.readyState === 1,
     dbStatus: mongoose.connection.readyState,
     dbError: dbError || "None",
-    fullUriMasked: maskedUri,
+    aiStatus: getAIStatus(),
+    websocketServer: process.env.WEBSOCKET_SERVER || "wss://peaceful-websocket.onrender.com (FALLBACK)",
     timestamp: new Date().toISOString()
   });
 });

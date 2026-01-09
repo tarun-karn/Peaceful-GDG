@@ -132,4 +132,10 @@ const startGeminiChat = (history = []) => {
   }
 };
 
-module.exports = { setupGeminiChat, geminiModel, startGeminiChat };
+const getAIStatus = () => ({
+  initialized: !!(geminiModel || openaiClient),
+  provider: activeProvider,
+  model: activeProvider === "openai" ? OPENROUTER_MODEL_NAME : GOOGLE_MODEL_NAME
+});
+
+module.exports = { setupGeminiChat, geminiModel, startGeminiChat, getAIStatus };
