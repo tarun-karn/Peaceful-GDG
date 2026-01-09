@@ -13,10 +13,16 @@ function connectDB() {
   console.log(`Attempting to connect to MongoDB with URI: ${maskedUri}`);
   
   return mongoose.connect(String(uri), {
-    serverSelectionTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 20000, // Increased to 20s
     socketTimeoutMS: 45000,
   }).catch(err => {
-    console.error(`MongoDB Connection Object Error: Name: ${err.name}, Code: ${err.code}, Message: ${err.message}`);
+    const errorDetail = {
+      name: err.name,
+      code: err.code,
+      message: err.message,
+      reason: err.reason ? err.reason.message : "No reason provided"
+    };
+    console.error(`MongoDB Connection Object Error: ${JSON.stringify(errorDetail)}`);
     throw err;
   });
 }

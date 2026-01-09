@@ -22,7 +22,8 @@ connectDB()
     isInitialized = true;
   })
   .catch((err) => {
-    dbError = err.message;
+    dbError = `[${err.name || "Error"}] ${err.message}`;
+    if (err.reason) dbError += ` (Reason: ${err.reason.message})`;
     console.error("Database connection failed:", err.message);
   });
 
