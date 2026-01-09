@@ -66,6 +66,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/", (req, res) => {
+  const uri = (process.env.MONGO_URI || "").trim();
+  const maskedUri = uri.replace(/\/\/.*@/, "//****:****@");
+  
   res.status(200).json({
     status: "Backend is active",
     version: VERSION,
