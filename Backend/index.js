@@ -14,13 +14,11 @@ const { setupGeminiChat } = require("./gemini/chat.js");
 
 const app = express();
 let isInitialized = false;
-let dbError = null;
-
 // Initialize Database connection
 connectDB()
   .then(() => {
     console.log("Database connected successfully");
-    isInitialized = true;
+    dbError = null;
   })
   .catch((err) => {
     dbError = `[${err.name || "Error"}] ${err.message}`;
@@ -68,16 +66,17 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ================== ROUTES ================== */
-// Health check
 app.get("/", (req, res) => {
+  const uri = (process.env.MONGO_URI || "").trim();
+  const maskedUri = uri.replace(/\/\/.*@/, "//****:****@");
+  
   res.status(200).json({
     status: "Backend is active",
     version: VERSION,
-    dbInitialized: isInitialized,
-    dbStatus: mongoose.connection.readyState,
+    dbInitialized: mongoose.connection.readyState === 1,
+    dbStatus: mongoose.connection.readyState, // 0=disc, 1=conn, 2=conning, 3=disconning
     dbError: dbError || "None",
-    mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + "..." : "None",
+    fullUriMasked: maskedUri,
     timestamp: new Date().toISOString()
   });
 });
@@ -86,7 +85,6 @@ app.get("/debug-db", async (req, res) => {
   try {
     console.log("Manual re-connect triggered...");
     await connectDB();
-    isInitialized = true;
     dbError = null;
     res.json({ status: "Success", message: "Connected to MongoDB" });
   } catch (err) {
@@ -94,8 +92,7 @@ app.get("/debug-db", async (req, res) => {
     if (err.reason) dbError += ` (Reason: ${err.reason.message})`;
     res.status(500).json({ 
       status: "Failed", 
-      error: dbError,
-      mongoUriPrefix: process.env.MONGO_URI ? process.env.MONGO_URI.substring(0, 20) + "..." : "None"
+      error: dbError
     });
   }
 });
