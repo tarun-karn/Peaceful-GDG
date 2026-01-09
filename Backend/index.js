@@ -1,5 +1,34 @@
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const dotenv = require("dotenv");
+const path = require("path");
+const connectDB = require("./db/connect.js");
+const router = require("./routers/router.js");
+
+dotenv.config();
+
+const app = express();
+let isInitialized = false;
+
+// Initialize Database connection
+connectDB()
+  .then(() => {
+    console.log("Database connected successfully");
+    isInitialized = true;
+  })
+  .catch((err) => {
+    console.error("Database connection failed:", err.message);
+  });
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
 const allowedOrigins = [
-  "https://peaceful-gdg.vercel.app"
+  "https://peaceful-gdg.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173"
 ];
 
 app.use((req, res, next) => {
@@ -40,4 +69,12 @@ app.get("/", (req, res) => {
 app.use("/api", router);
 
 /* ================== EXPORT ================== */
+if (process.env.NODE_ENV !== "production") {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
 module.exports = app;
+
