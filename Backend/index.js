@@ -66,15 +66,13 @@ app.use((req, res, next) => {
   next();
 });
 
-app.get("/", (req, res) => {
-  const uri = (process.env.MONGO_URI || "").trim();
-  const maskedUri = uri.replace(/\/\/.*@/, "//****:****@");
-  
   res.status(200).json({
     status: "Backend is active",
     version: VERSION,
+    nodeVersion: process.version,
+    mongooseVersion: mongoose.version,
     dbInitialized: mongoose.connection.readyState === 1,
-    dbStatus: mongoose.connection.readyState, // 0=disc, 1=conn, 2=conning, 3=disconning
+    dbStatus: mongoose.connection.readyState,
     dbError: dbError || "None",
     fullUriMasked: maskedUri,
     timestamp: new Date().toISOString()
