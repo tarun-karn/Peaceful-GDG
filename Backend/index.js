@@ -70,6 +70,7 @@ app.get("/", (req, res) => {
   res.status(200).json({
     status: "Backend is active",
     dbInitialized: isInitialized,
+    dbStatus: mongoose.connection.readyState, // 0: disconnected, 1: connected, 2: connecting, 3: disconnecting
     dbError: dbError || "None",
     env: process.env.NODE_ENV || "development",
     mongoUriDetected: !!process.env.MONGO_URI,

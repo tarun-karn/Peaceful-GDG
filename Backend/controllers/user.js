@@ -4,9 +4,13 @@ const report = require("../models/Report");
 const { v4: uuid } = require("uuid");
 const User = require("../models/User");
 const { decodeAuthToken } = require("../firebase/auth");
+const mongoose = require("mongoose");
 
 async function signinwithGoogle(req,res){
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
     const token = req.headers.token
     const email = await decodeAuthToken(token)
     console.log(email);
@@ -87,6 +91,9 @@ async function signinwithGoogle(req,res){
 }
 async function signup(req, res) {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
     const token = req.headers.token;
     // console.log(req.headers.token+ "here");
     const email = await decodeAuthToken(token);
@@ -141,6 +148,9 @@ async function signup(req, res) {
 
 async function login(req, res) {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
     // const auth = new FirebaseAuth();
     const email = await decodeAuthToken(req.headers.token);
     if (!email) {
@@ -167,6 +177,9 @@ async function login(req, res) {
 
 async function isUser(req, res) {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
     // console.log(req.cookies);
     if (req.cookies?.userid) {
       const userid = req.cookies?.userid;

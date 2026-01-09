@@ -7,12 +7,18 @@ const { startGeminiChat } = require("../gemini/chat.js");
 const chatHistModel = require("../models/ChatHist.js");
 
 
+const mongoose = require("mongoose");
+
 const connectWithChatBot = async (req, res) => {
   try {
     if (req.userId === undefined) {
-      // through err
-      return;
+      return res.status(400).json({ error: "UserId is required" });
     }
+
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected. Please check server logs and Atlas whitelist." });
+    }
+
     const foundHist = await chatHistModel
       .find({ userId: req.userId })
       .sort({ timestamp: 1 });
@@ -50,7 +56,18 @@ const connectWithChatBot = async (req, res) => {
     })}`;
     
     const wss = new WebSocket(websocketserverLink);
+    
+    const connectionTimeout = setTimeout(() => {
+      if (wss.readyState !== WebSocket.OPEN) {
+        wss.terminate();
+        if (!res.headersSent) {
+          res.status(504).json({ error: "Gateway Timeout: Could not connect to WebSocket Server (Render might be sleeping)" });
+        }
+      }
+    }, 8000); // 8 second timeout
+
     wss.on("open", () => {
+      clearTimeout(connectionTimeout);
       // console.log("Backend Connected to WebSocket Server successfully!");
       res.status(200).json({ chatId: roomId });
       wss.send(JSON.stringify({ type: "server:connected" }));

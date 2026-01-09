@@ -6,7 +6,7 @@ const path = require("path");
 dotenv.config({ path: path.join(__dirname, "..", ".env") });
 
 function connectDB() {
-  const uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI ? process.env.MONGO_URI.trim() : null;
   if (!uri) {
     console.error("MONGO_URI is missing from process.env");
     return Promise.reject(new Error("MONGO_URI environment variable is not set"));

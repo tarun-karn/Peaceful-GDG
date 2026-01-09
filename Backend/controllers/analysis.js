@@ -11,9 +11,13 @@ const {
 
 const Report = require("../models/Report.js");
 const User = require("../models/User.js");
+const mongoose = require("mongoose");
 
 const doAnalysis = async (req, res) => {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
     if (!req.userId) {
       res.status(401).json({ Error: "UserId not found" });
       return;
@@ -122,6 +126,9 @@ const genAnalysis = async (userId) => {
 const getAnalysis = async (req, res) => {
   // console.log(req.cookies);
   try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.status(503).json({ error: "Database not connected" });
+    }
     if (!req.userId) {
       res.status(401).json({ msg: "UserId not found" });
       return;

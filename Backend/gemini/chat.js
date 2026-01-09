@@ -19,7 +19,7 @@ const HARDCODED_KEY = "sk-or-v1-4da0db7ac68ad3f86bf941297264743a1f581a77ba9a90e1
 
 const setupGeminiChat = async () => {
   try {
-    let apiKey = process.env.GEMINI_KEY;
+    let apiKey = process.env.GEMINI_KEY ? process.env.GEMINI_KEY.trim() : null;
     if (!apiKey || apiKey === "undefined") {
       console.warn("process.env.GEMINI_KEY missing. Using Hardcoded Fallback.");
       apiKey = HARDCODED_KEY;
